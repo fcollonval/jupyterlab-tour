@@ -1,3 +1,5 @@
+import Ajv from 'ajv';
+
 import { Signal, ISignal } from '@lumino/signaling';
 import { Notebook } from '@jupyterlab/notebook';
 import {
@@ -8,6 +10,7 @@ import {
   NOTEBOOK_PLUGIN_ID
 } from './tokens';
 import { notebookTourIcon } from './icons';
+import USER_SCHEMA from '../schema/user-tours.json';
 
 /**
  * The NotebookTourManager is needed to sync Notebook metadata with the TourManager
@@ -15,6 +18,7 @@ import { notebookTourIcon } from './icons';
 export class NotebookTourManager implements INotebookTourManager {
   constructor(options: INotebookTourManager.IOptions) {
     this._tourManager = options.tourManager;
+    this._validator = new Ajv().compile(USER_SCHEMA);
   }
 
   get tourManager(): ITourManager {
@@ -58,6 +62,15 @@ export class NotebookTourManager implements INotebookTourManager {
     return tourIds;
   }
 
+  /**
+   * Get the validation errors for a notebook
+   * @param notebook the notebook
+   * @returns the list of errors
+   */
+  getNotebookValidationErrors(notebook: Notebook): Ajv.ErrorObject[] {
+    return this._validationErrors.get(notebook) || [];
+  }
+
   get notebookToursChanged(): ISignal<INotebookTourManager, Notebook> {
     return this._notebookToursChanged;
   }
@@ -77,34 +90,44 @@ export class NotebookTourManager implements INotebookTourManager {
    */
   private _notebookMetadataChanged(notebook: Notebook): void {
     const metadata = notebook.model?.metadata.get(NS);
+    const trans = this._tourManager.translator;
 
     this._cleanNotebookTours(notebook);
+    this._validationErrors.set(notebook, []);
 
-    if (!metadata) {
-      return;
-    }
-    const tours: ITour[] =
-      (notebook.model?.metadata.get(NS) as any)['tours'] || [];
-
-    for (const tour of this.tourManager.sortTours(tours)) {
-      try {
-        this._addNotebookTour(notebook, tour);
-        this._tourManager.launch([tour.id], false);
-      } catch (error) {
-        const trans = this._tourManager.translator;
-        console.groupCollapsed(
-          trans.__(
-            'Error encountered adding notebook tour %1 (%2)',
-            tour.label,
-            tour.id
-          ),
-          error
+    if (metadata) {
+      this._validator(metadata);
+      const errors = this._validator.errors || [];
+      this._validationErrors.set(notebook, errors);
+      if (errors.length) {
+        console.error(
+          trans.__('Validation errors found: fix them in Advanced Settings')
         );
-        console.table(tour.steps);
-        console.log(tour.options || {});
-        console.groupEnd();
+        console.table(errors);
+      } else {
+        const tours: ITour[] =
+          (notebook.model?.metadata.get(NS) as any)['tours'] || [];
+        for (const tour of this.tourManager.sortTours(tours)) {
+          try {
+            this._addNotebookTour(notebook, tour);
+            this._tourManager.launch([tour.id], false);
+          } catch (error) {
+            console.groupCollapsed(
+              trans.__(
+                'Error encountered adding notebook tour %1 (%2)',
+                tour.label,
+                tour.id
+              ),
+              error
+            );
+            console.table(tour.steps);
+            console.log(tour.options || {});
+            console.groupEnd();
+          }
+        }
       }
     }
+
     this._notebookToursChanged.emit(notebook);
   }
 
@@ -124,4 +147,6 @@ export class NotebookTourManager implements INotebookTourManager {
   private _notebookToursChanged = new Signal<INotebookTourManager, Notebook>(
     this
   );
+  private _validator: Ajv.ValidateFunction;
+  private _validationErrors = new Map<Notebook, Ajv.ErrorObject[]>();
 }

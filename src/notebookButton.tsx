@@ -8,7 +8,7 @@ import { HTMLSelect } from '@jupyterlab/ui-components';
 import { NotebookPanel, Notebook, INotebookModel } from '@jupyterlab/notebook';
 
 import { INotebookTourManager } from './tokens';
-import { notebookTourIcon, notebookHasTourIcon } from './icons';
+import { notebookTourIcon, notebookHasTourIcon, errorTourIcon } from './icons';
 import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
@@ -64,30 +64,45 @@ export class TourButton extends ReactWidget {
   }
 
   render(): JSX.Element {
-    let title = this.translator.__('Start a Notebook Tour');
+    const trans = this.translator;
+    let title = trans.__('Start a Notebook Tour');
     const tourIds = this._manager.getNotebookTourIds(this._notebook);
     let icon = notebookTourIcon;
+
     if (tourIds.length) {
       title = `${title} (${tourIds.length})`;
       icon = notebookHasTourIcon;
+    }
+    const errors = this._manager.getNotebookValidationErrors(this._notebook);
+
+    if (errors.length) {
+      title = this.translator.__('Errors');
+      icon = errorTourIcon;
     }
 
     return (
       <HTMLSelect
         onChange={this.handleChange}
         icon={icon}
-        aria-label={this.translator.__('Notebook Tours')}
+        aria-label={trans.__('Notebook Tours')}
         title={title}
         value=""
       >
         <option value=""></option>
-        {tourIds.length ? (
-          <option value="ALL">{this.translator.__('Run all tours')}</option>
+        {errors.length ? (
+          <option>
+            {trans.__('Tour metadata is not valid: see the browser console!')}
+          </option>
         ) : (
           []
         )}
         {tourIds.length ? (
-          <optgroup label={this.translator.__('Notebook Tours')}>
+          <option value="ALL">{trans.__('Run all Tours')}</option>
+        ) : (
+          <option>{trans.__('No Tours found in this Notebook')}</option>
+        )}
+        {tourIds.length ? (
+          <optgroup label={trans.__('Notebook Tours')}>
             {tourIds.map(this.renderOption)}
           </optgroup>
         ) : (

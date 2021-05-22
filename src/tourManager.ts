@@ -11,9 +11,8 @@ import { INotification } from 'jupyterlab_toastify';
 import { Locale, Props as JoyrideProps } from 'react-joyride';
 
 import { CommandIDs } from './constants';
-import { ITour, ITourHandler, ITourManager, NS } from './tokens';
+import { ITour, ITourHandler, ITourManager, NS, VERSION } from './tokens';
 import { TourHandler } from './tour';
-import { version } from './version';
 
 const STATE_ID = `${NS}:state`;
 
@@ -54,10 +53,10 @@ export class TourManager implements ITourManager {
     this._stateDB.fetch(STATE_ID).then(value => {
       if (value) {
         const savedState = (value as any) as IManagerState;
-        if (savedState.version !== version) {
+        if (savedState.version !== VERSION) {
           this._state.toursDone = new Set<string>();
           this._stateDB.save(STATE_ID, {
-            version,
+            version: VERSION,
             toursDone: []
           });
         } else {
@@ -322,7 +321,7 @@ export class TourManager implements ITourManager {
     this._state.toursDone.delete(id);
     this._stateDB.save(STATE_ID, {
       toursDone: [...this._state.toursDone],
-      version
+      version: VERSION
     });
   };
 
@@ -330,7 +329,7 @@ export class TourManager implements ITourManager {
     this._state.toursDone.add(id);
     this._stateDB.save(STATE_ID, {
       toursDone: [...this._state.toursDone],
-      version
+      version: VERSION
     });
   };
 
@@ -362,7 +361,7 @@ export class TourManager implements ITourManager {
   private _menuItems: Map<string, Menu.IItem> = new Map();
   private _state: IManagerState = {
     toursDone: new Set<string>(),
-    version
+    version: VERSION
   };
   private _stateDB: IStateDB;
   private _trans: TranslationBundle;

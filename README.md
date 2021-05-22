@@ -99,7 +99,7 @@ The same JSON used to create a tour in _Advanced Settings_ can be added to a Not
 - Open the Notebook
 - Open the _Property Inspector_ sidebar (the "gears" icon)
 - Open _Advanced Tools_
-- Create a key like:
+- Create a key in _Notebook Metadata_ like:
 
 ```json5
 {

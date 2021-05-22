@@ -1,3 +1,4 @@
+import Ajv from 'ajv';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { Notebook } from '@jupyterlab/notebook';
@@ -6,6 +7,8 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { LabIcon } from '@jupyterlab/ui-components';
 import React from 'react';
+import PACKAGE from '../package.json';
+
 import {
   CallBackProps,
   Placement,
@@ -14,9 +17,14 @@ import {
 } from 'react-joyride';
 
 /**
+ * Version for everything
+ */
+export const VERSION = PACKAGE.version;
+
+/**
  * Namespace for everything
  */
-export const NS = 'jupyterlab-tour';
+export const NS = PACKAGE.name;
 
 /**
  * Core Extension ID
@@ -349,10 +357,15 @@ export interface INotebookTourManager {
   /**
    * Get the list of full tour ids for this notebook
    *
-   * @param panel the notebook
-   * @returns
+   * @param notebook the notebook
+   * @returns the ids of tours in this notebook
    */
-  getNotebookTourIds(motebook: Notebook): string[];
+  getNotebookTourIds(notebook: Notebook): string[];
+
+  /**
+   * Get errors found in the notebook metadata
+   */
+  getNotebookValidationErrors(notebook: Notebook): Ajv.ErrorObject[];
 
   /**
    * A signal that emits when a particular notebooks tours change
