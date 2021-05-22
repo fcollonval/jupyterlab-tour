@@ -1,18 +1,17 @@
+import { ISignal, Signal } from '@lumino/signaling';
+import { Menu } from '@lumino/widgets';
+
 import { MainMenu } from '@jupyterlab/mainmenu';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Menu } from '@lumino/widgets';
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { INotification } from 'jupyterlab_toastify';
+
 import { Locale, Props as JoyrideProps } from 'react-joyride';
+
 import { CommandIDs } from './constants';
-import {
-  ITour,
-  ITourHandler,
-  ITourManager,
-  NS,
-  USER_PLUGIN_ID
-} from './tokens';
+import { ITour, ITourHandler, ITourManager, NS } from './tokens';
 import { TourHandler } from './tour';
 import { version } from './version';
 
@@ -122,10 +121,11 @@ export class TourManager implements ITourManager {
       }
 
       const handler = this.createTour(
-        `${USER_PLUGIN_ID}:${tour.id}`,
+        tour.id,
         trans.__(tour.label),
         tour.hasHelpEntry === false ? false : true,
-        tour.options
+        tour.options,
+        tour.icon ? LabIcon.resolve({ icon: tour.icon }) : null
       );
 
       tour.steps.forEach(step => {
@@ -165,7 +165,8 @@ export class TourManager implements ITourManager {
     id: string,
     label: string,
     addToHelpMenu = true,
-    options: Omit<JoyrideProps, 'steps'> = {}
+    options: Omit<JoyrideProps, 'steps'> = {},
+    icon: LabIcon | null = null
   ): ITourHandler => {
     if (this._tours.has(id)) {
       throw new Error(
@@ -182,7 +183,7 @@ export class TourManager implements ITourManager {
     }
 
     // Create tour and add it to help menu if needed
-    const newTutorial: TourHandler = new TourHandler(id, label, options);
+    const newTutorial: TourHandler = new TourHandler(id, label, options, icon);
     if (this._menu && addToHelpMenu) {
       const menuItem = this._menu.helpMenu.menu.addItem({
         args: {
@@ -308,6 +309,15 @@ export class TourManager implements ITourManager {
     this._forgetDoneTour(id);
   }
 
+  /**
+   * Order a list of tours by label, if possible, falling back to unique id
+   */
+  sortTours(tours: ITour[]): ITour[] {
+    const sortedTours = [...tours];
+    sortedTours.sort(this._compareTours);
+    return sortedTours;
+  }
+
   private _forgetDoneTour = (id: string): void => {
     this._state.toursDone.delete(id);
     this._stateDB.save(STATE_ID, {
@@ -323,6 +333,27 @@ export class TourManager implements ITourManager {
       version
     });
   };
+
+  /**
+   * Helper to sort user tours by label, if possible, falling back to unique id
+   */
+  private _compareTours(a: ITour, b: ITour): number {
+    let transA = this.translator;
+    if (a.translation) {
+      transA = this._translator.load(a.translation);
+    }
+    let transB = this.translator;
+    if (b.translation) {
+      transB = this._translator.load(b.translation);
+    }
+    return (
+      transA
+        .__(a.label)
+        .toLocaleLowerCase()
+        .localeCompare(transB.__(b.label).toLocaleLowerCase()) ||
+      a.id.localeCompare(b.id)
+    );
+  }
 
   private _activeTours: TourHandler[] = new Array<TourHandler>();
   private _isDisposed = false;

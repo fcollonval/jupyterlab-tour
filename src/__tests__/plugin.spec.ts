@@ -1,22 +1,36 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import {
+  INotebookTracker,
+  Notebook,
+  NotebookModel
+} from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { StateDB } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
 import { Signal } from '@lumino/signaling';
 import 'jest';
 import { CommandIDs } from '../constants';
 import plugin from '../index';
-import { ITour, ITourManager, IUserTourManager } from '../tokens';
+import {
+  INotebookTourManager,
+  ITour,
+  ITourManager,
+  IUserTourManager,
+  NS
+} from '../tokens';
 
 const DEFAULT_TOURS_SIZE = 2;
 
-const [corePlugin, userPlugin, defaultsPlugin] = plugin;
+const [corePlugin, userPlugin, notebookPlugin, defaultsPlugin] = plugin;
 
 function mockApp(): Partial<JupyterFrontEnd> {
   return {
     commands: new CommandRegistry(),
-    restored: Promise.resolve()
+    restored: Promise.resolve(),
+    docRegistry: new DocumentRegistry()
   };
 }
 
@@ -59,6 +73,12 @@ function mockSettingRegistry(): ISettingRegistry {
   return {
     load: async (): Promise<any> => settings as any
   } as any;
+}
+
+function mockNbTracker(): Partial<INotebookTracker> {
+  const nbTracker: Partial<INotebookTracker> = {};
+  (nbTracker as any).widgetAdded = new Signal<any, any>(nbTracker);
+  return nbTracker;
 }
 
 describe(corePlugin.id, () => {
@@ -128,6 +148,36 @@ describe(userPlugin.id, () => {
       (settings as any).composite = { tours: [] };
       (settings as any).changed.emit(void 0);
       expect(userManager.tourManager.tours.size).toBe(0);
+    });
+  });
+});
+
+describe(notebookPlugin.id, () => {
+  describe('activation', () => {
+    it('should activate', async () => {
+      const app = mockApp();
+      const stateDB = new StateDB();
+      const manager = corePlugin.activate(app as any, stateDB) as ITourManager;
+      const nbTracker = mockNbTracker();
+      const notebookTourManager = notebookPlugin.activate(
+        app as any,
+        nbTracker,
+        manager
+      ) as INotebookTourManager;
+      const notebook = new Notebook({
+        rendermime: null as any,
+        mimeTypeService: new CodeMirrorMimeTypeService()
+      });
+      const model = new NotebookModel();
+      notebook.model = model;
+      notebookTourManager.addNotebook(notebook);
+      expect(notebookTourManager.tourManager.tours.size).toBe(0);
+      model.metadata.set(NS, {
+        tours: [(aTour() as unknown) as ReadonlyJSONObject]
+      });
+      expect(notebookTourManager.tourManager.tours.size).toBe(1);
+      model.metadata.delete(NS);
+      expect(notebookTourManager.tourManager.tours.size).toBe(0);
     });
   });
 });

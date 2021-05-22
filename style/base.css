@@ -5,5 +5,9 @@
 }
 
 .react-joyride__tooltip small {
-  font-size: .8em
+  font-size: 0.8em;
+}
+
+.jp-NotebookTour-toolbaritem {
+  max-width: 2.25em;
 }

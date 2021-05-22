@@ -1,8 +1,10 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
+import { Notebook } from '@jupyterlab/notebook';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
+import { LabIcon } from '@jupyterlab/ui-components';
 import React from 'react';
 import {
   CallBackProps,
@@ -27,6 +29,11 @@ export const PLUGIN_ID = `${NS}:plugin`;
 export const USER_PLUGIN_ID = `${NS}:user-tours`;
 
 /**
+ * Notebook-defined tours extension ID
+ */
+export const NOTEBOOK_PLUGIN_ID = `${NS}:notebook-tours`;
+
+/**
  * First-party curated tours, like Notebook and Welcomes
  */
 export const DEFAULTS_PLUGIN_ID = `${NS}:default-tours`;
@@ -40,6 +47,13 @@ export const ITourManager = new Token<ITourManager>(`${NS}:ITourManager`);
  * Token to get a reference to the user tours manager
  */
 export const IUserTourManager = new Token<IUserTourManager>(
+  `${NS}:IUserTourManager`
+);
+
+/**
+ * Token to get a reference to the notebook tours manager
+ */
+export const INotebookTourManager = new Token<INotebookTourManager>(
   `${NS}:IUserTourManager`
 );
 
@@ -87,6 +101,10 @@ export interface ITour {
    * Should this tour be added as entry in the Help menu. User-added tours always are.
    */
   hasHelpEntry: boolean;
+  /**
+   * The `name` of a LabIcon to show next to this tour
+   */
+  icon?: string;
   /**
    * Tour steps
    */
@@ -166,6 +184,11 @@ export interface ITourHandler extends IDisposable {
   readonly label: string;
 
   /**
+   * The tour icon
+   */
+  readonly icon: LabIcon | null;
+
+  /**
    * Each tour can have it's behavior, attributes and css styling customized
    * by accessing and setting its options.
    */
@@ -234,6 +257,7 @@ export interface ITourManager extends IDisposable {
    * @param label The label to use for the tour. If added to help menu, this would be the button text.
    * @param addToHelpMenu If true, the tour will be added as a button on the help menu. Default = True.
    * @param options Tour options
+   * @param icon An optional icon to display in the Help Menu and Command Palette
    *
    * @returns The tour created
    */
@@ -241,7 +265,8 @@ export interface ITourManager extends IDisposable {
     id: string,
     label: string,
     addToHelpMenu?: boolean,
-    options?: Omit<JoyrideProps, 'steps'>
+    options?: Omit<JoyrideProps, 'steps'>,
+    icon?: LabIcon
   ): ITourHandler;
 
   /**
@@ -259,6 +284,14 @@ export interface ITourManager extends IDisposable {
    * @param tour The TourHandler object or the id of the tour object to remove
    */
   removeTour(tour: string | ITourHandler): void;
+
+  /**
+   * Return a copy of
+   *
+   * @param tours an unordered list of tours
+   * @returns an ordered list of tours
+   */
+  sortTours(tours: ITour[]): ITour[];
 
   /**
    * A key/value map of the tours that the tour manager contains.
@@ -294,12 +327,50 @@ export namespace IUserTourManager {
      */
     tourManager: ITourManager;
     /**
-     * Application translator manager
-     */
-    translator?: ITranslator;
-    /**
      * Extension settings getter
      */
     getSettings: () => Promise<ISettingRegistry.ISettings>;
+  }
+}
+
+/**
+ * Notebook Tours manager interface
+ */
+export interface INotebookTourManager {
+  /**
+   * Tour manager
+   */
+  readonly tourManager: ITourManager;
+  /**
+   * The current notebook
+   */
+  addNotebook(notebook: Notebook): Promise<void>;
+
+  /**
+   * Get the list of full tour ids for this notebook
+   *
+   * @param panel the notebook
+   * @returns
+   */
+  getNotebookTourIds(motebook: Notebook): string[];
+
+  /**
+   * A signal that emits when a particular notebooks tours change
+   */
+  notebookToursChanged: ISignal<INotebookTourManager, Notebook>;
+}
+
+/**
+ * Namespace for notebook tour interfaces
+ */
+export namespace INotebookTourManager {
+  /**
+   * NotebookTourManager constructor options
+   */
+  export interface IOptions {
+    /**
+     * Tour manager
+     */
+    tourManager: ITourManager;
   }
 }

@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "description": "Configuration for user-defined tours. This schema is generated from https://github.com/gilbarbara/react-joyride/blob/master/types/index.d.ts",
   "jupyter.lab.setting-icon-label": "Tours",
+  "jupyter.lab.setting-icon": "jupyterlab-tour:user-tour",
   "title": "Tours",
   "type": "object",
   "properties": {
@@ -11,7 +12,11 @@
       "default": [],
       "items": {
         "type": "object",
-        "required": ["id", "label", "steps"],
+        "required": [
+          "id",
+          "label",
+          "steps"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -25,6 +30,11 @@
             "type": "boolean",
             "description": "Whether to add a Help Menu item with the label to launch the tour",
             "default": true
+          },
+          "icon": {
+            "type": "string",
+            "description": "The name of an already-registered LabIcon to display next to this tour",
+            "default": "jupyterlab-tour:user-tour"
           },
           "steps": {
             "description": "The definition of the steps of a tour",
@@ -65,7 +75,13 @@
           "$ref": "#/definitions/Step"
         }
       },
-      "required": ["continuous", "index", "isLastStep", "size", "step"],
+      "required": [
+        "continuous",
+        "index",
+        "isLastStep",
+        "size",
+        "step"
+      ],
       "type": "object"
     },
     "CallBackProps": {
@@ -224,7 +240,12 @@
       "type": "string"
     },
     "PlacementBeacon": {
-      "enum": ["top", "bottom", "left", "right"],
+      "enum": [
+        "top",
+        "bottom",
+        "left",
+        "right"
+      ],
       "type": "string"
     },
     "Props": {
@@ -378,7 +399,10 @@
           "type": "string"
         }
       },
-      "required": ["content", "target"],
+      "required": [
+        "content",
+        "target"
+      ],
       "type": "object"
     },
     "StoreHelpers": {
@@ -466,7 +490,10 @@
               "type": "string"
             },
             "width": {
-              "type": ["string", "number"]
+              "type": [
+                "string",
+                "number"
+              ]
             },
             "zIndex": {
               "type": "number"
@@ -529,7 +556,12 @@
               "type": "string"
             }
           },
-          "required": ["aria-label", "data-action", "role", "title"],
+          "required": [
+            "aria-label",
+            "data-action",
+            "role",
+            "title"
+          ],
           "type": "object"
         },
         "closeProps": {
@@ -548,7 +580,12 @@
               "type": "string"
             }
           },
-          "required": ["aria-label", "data-action", "role", "title"],
+          "required": [
+            "aria-label",
+            "data-action",
+            "role",
+            "title"
+          ],
           "type": "object"
         },
         "continuous": {
@@ -576,7 +613,12 @@
               "type": "string"
             }
           },
-          "required": ["aria-label", "data-action", "role", "title"],
+          "required": [
+            "aria-label",
+            "data-action",
+            "role",
+            "title"
+          ],
           "type": "object"
         },
         "size": {
@@ -598,7 +640,12 @@
               "type": "string"
             }
           },
-          "required": ["aria-label", "data-action", "role", "title"],
+          "required": [
+            "aria-label",
+            "data-action",
+            "role",
+            "title"
+          ],
           "type": "object"
         },
         "step": {
@@ -614,7 +661,10 @@
               "type": "string"
             }
           },
-          "required": ["aria-modal", "role"],
+          "required": [
+            "aria-modal",
+            "role"
+          ],
           "type": "object"
         }
       },
@@ -636,51 +686,75 @@
       "additionalProperties": false,
       "properties": {
         "CLOSE": {
-          "enum": ["close"],
+          "enum": [
+            "close"
+          ],
           "type": "string"
         },
         "GO": {
-          "enum": ["go"],
+          "enum": [
+            "go"
+          ],
           "type": "string"
         },
         "INDEX": {
-          "enum": ["index"],
+          "enum": [
+            "index"
+          ],
           "type": "string"
         },
         "INIT": {
-          "enum": ["init"],
+          "enum": [
+            "init"
+          ],
           "type": "string"
         },
         "NEXT": {
-          "enum": ["next"],
+          "enum": [
+            "next"
+          ],
           "type": "string"
         },
         "PREV": {
-          "enum": ["prev"],
+          "enum": [
+            "prev"
+          ],
           "type": "string"
         },
         "RESET": {
-          "enum": ["reset"],
+          "enum": [
+            "reset"
+          ],
           "type": "string"
         },
         "RESTART": {
-          "enum": ["restart"],
+          "enum": [
+            "restart"
+          ],
           "type": "string"
         },
         "SKIP": {
-          "enum": ["skip"],
+          "enum": [
+            "skip"
+          ],
           "type": "string"
         },
         "START": {
-          "enum": ["start"],
+          "enum": [
+            "start"
+          ],
           "type": "string"
         },
         "STOP": {
-          "enum": ["stop"],
+          "enum": [
+            "stop"
+          ],
           "type": "string"
         },
         "UPDATE": {
-          "enum": ["update"],
+          "enum": [
+            "update"
+          ],
           "type": "string"
         }
       },
@@ -704,43 +778,63 @@
       "additionalProperties": false,
       "properties": {
         "BEACON": {
-          "enum": ["beacon"],
+          "enum": [
+            "beacon"
+          ],
           "type": "string"
         },
         "ERROR": {
-          "enum": ["error"],
+          "enum": [
+            "error"
+          ],
           "type": "string"
         },
         "STEP_AFTER": {
-          "enum": ["step:after"],
+          "enum": [
+            "step:after"
+          ],
           "type": "string"
         },
         "STEP_BEFORE": {
-          "enum": ["step:before"],
+          "enum": [
+            "step:before"
+          ],
           "type": "string"
         },
         "TARGET_NOT_FOUND": {
-          "enum": ["error:target_not_found"],
+          "enum": [
+            "error:target_not_found"
+          ],
           "type": "string"
         },
         "TOOLTIP": {
-          "enum": ["tooltip"],
+          "enum": [
+            "tooltip"
+          ],
           "type": "string"
         },
         "TOOLTIP_CLOSE": {
-          "enum": ["close"],
+          "enum": [
+            "close"
+          ],
           "type": "string"
         },
         "TOUR_END": {
-          "enum": ["tour:end"],
+          "enum": [
+            "tour:end"
+          ],
           "type": "string"
         },
         "TOUR_START": {
-          "enum": ["tour:start"],
+          "enum": [
+            "tour:start"
+          ],
           "type": "string"
         },
         "TOUR_STATUS": {
-          "enum": ["tour:status"],
+          "enum": [
+            "tour:status"
+          ],
           "type": "string"
         }
       },
@@ -762,66 +856,101 @@
       "additionalProperties": false,
       "properties": {
         "BEACON": {
-          "enum": ["beacon"],
+          "enum": [
+            "beacon"
+          ],
           "type": "string"
         },
         "COMPLETE": {
-          "enum": ["complete"],
+          "enum": [
+            "complete"
+          ],
           "type": "string"
         },
         "ERROR": {
-          "enum": ["error"],
+          "enum": [
+            "error"
+          ],
           "type": "string"
         },
         "INIT": {
-          "enum": ["init"],
+          "enum": [
+            "init"
+          ],
           "type": "string"
         },
         "READY": {
-          "enum": ["ready"],
+          "enum": [
+            "ready"
+          ],
           "type": "string"
         },
         "TOOLTIP": {
-          "enum": ["tooltip"],
+          "enum": [
+            "tooltip"
+          ],
           "type": "string"
         }
       },
-      "required": ["INIT", "READY", "BEACON", "TOOLTIP", "COMPLETE", "ERROR"],
+      "required": [
+        "INIT",
+        "READY",
+        "BEACON",
+        "TOOLTIP",
+        "COMPLETE",
+        "ERROR"
+      ],
       "type": "object"
     },
     "status": {
       "additionalProperties": false,
       "properties": {
         "ERROR": {
-          "enum": ["error"],
+          "enum": [
+            "error"
+          ],
           "type": "string"
         },
         "FINISHED": {
-          "enum": ["finished"],
+          "enum": [
+            "finished"
+          ],
           "type": "string"
         },
         "IDLE": {
-          "enum": ["idle"],
+          "enum": [
+            "idle"
+          ],
           "type": "string"
         },
         "PAUSED": {
-          "enum": ["paused"],
+          "enum": [
+            "paused"
+          ],
           "type": "string"
         },
         "READY": {
-          "enum": ["ready"],
+          "enum": [
+            "ready"
+          ],
           "type": "string"
         },
         "RUNNING": {
-          "enum": ["running"],
+          "enum": [
+            "running"
+          ],
           "type": "string"
         },
         "SKIPPED": {
-          "enum": ["skipped"],
+          "enum": [
+            "skipped"
+          ],
           "type": "string"
         },
         "WAITING": {
-          "enum": ["waiting"],
+          "enum": [
+            "waiting"
+          ],
           "type": "string"
         }
       },

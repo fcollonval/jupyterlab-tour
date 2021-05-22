@@ -1,5 +1,4 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PromiseDelegate } from '@lumino/coreutils';
 import {
   ITour,
@@ -8,13 +7,14 @@ import {
   USER_PLUGIN_ID
 } from './tokens';
 
+import { userTourIcon } from './icons';
+
 /**
  * The UserTourManager is needed to manage syncing of user settings with the TourManager
  */
 export class UserTourManager implements IUserTourManager {
   constructor(options: IUserTourManager.IOptions) {
     this._tourManager = options.tourManager;
-    this._translator = options.translator ?? nullTranslator;
 
     options
       .getSettings()
@@ -57,9 +57,7 @@ export class UserTourManager implements IUserTourManager {
       }
     }
 
-    tours.sort(this._compareTours);
-
-    for (const tour of tours) {
+    for (const tour of this.tourManager.sortTours(tours)) {
       try {
         this._addUserTour(tour);
         this._tourManager.launch([tour.id], false);
@@ -84,32 +82,14 @@ export class UserTourManager implements IUserTourManager {
    * Actually create a tour from JSON
    */
   private _addUserTour(tour: ITour): void {
-    this._tourManager.addTour(tour);
-  }
-
-  /**
-   * Helper to sort user tours by label, if possible, falling back to unique id
-   */
-  private _compareTours(a: ITour, b: ITour): number {
-    let transA = this._tourManager.translator;
-    if (a.translation) {
-      transA = this._translator.load(a.translation);
-    }
-    let transB = this._tourManager.translator;
-    if (b.translation) {
-      transB = this._translator.load(b.translation);
-    }
-    return (
-      transA
-        .__(a.label)
-        .toLocaleLowerCase()
-        .localeCompare(transB.__(b.label).toLocaleLowerCase()) ||
-      a.id.localeCompare(b.id)
-    );
+    this._tourManager.addTour({
+      ...tour,
+      id: `${USER_PLUGIN_ID}:${tour.id}`,
+      icon: tour.icon || userTourIcon.name
+    });
   }
 
   private _ready = new PromiseDelegate<void>();
   private _tourManager: ITourManager;
-  private _translator: ITranslator;
   private _userTours: ISettingRegistry.ISettings | null = null;
 }
