@@ -76,7 +76,9 @@ export class TourButton extends ReactWidget {
     const errors = this._manager.getNotebookValidationErrors(this._notebook);
 
     if (errors.length) {
-      title = `${this.translator.__('Tour Validation Errors')}: ${errors.length}`;
+      title = `${this.translator.__('Tour Validation Errors')}: ${
+        errors.length
+      }`;
       icon = errorTourIcon;
     }
 
@@ -99,7 +101,9 @@ export class TourButton extends ReactWidget {
         {tourIds.length ? (
           <option value="ALL">{trans.__('Run all Tours')}</option>
         ) : (
-          <optgroup label={trans.__('No Tours found in this Notebook')}></optgroup>
+          <optgroup
+            label={trans.__('No Tours found in this Notebook')}
+          ></optgroup>
         )}
         {tourIds.length ? (
           <optgroup label={trans.__('Notebook Tours')}>
