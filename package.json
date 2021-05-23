@@ -43,7 +43,7 @@
     "test": "jest --coverage",
     "watch": "run-p watch:src watch:labextension",
     "watch:labextension": "jupyter labextension watch .",
-    "watch:src": "tsc -w"
+    "watch:src": "jlpm build:lib -w"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.0",
