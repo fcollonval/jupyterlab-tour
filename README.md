@@ -92,6 +92,28 @@ overlay when pressed:
 }
 ```
 
+## How to add a tour to a Notebook
+
+The same JSON used to create a tour in _Advanced Settings_ can be added to a Notebook.
+
+- Open the Notebook
+- Open the _Property Inspector_ sidebar (the "gears" icon)
+- Open _Advanced Tools_
+- Create a key in _Notebook Metadata_ like:
+
+```json5
+{
+  "jupyterlab-tour": {
+    "tours": [
+      // that tour up there!
+    ]
+  }
+}
+```
+
+Now, when the notebook is opened, a "pin" icon will be visible in the _Notebook Toolbar_
+which will allow lauching one (or all) of the tours saved in the Notebook.
+
 ### Shipping a Tour to Binder
 
 On Binder, and elsewhere, you can store the above (_without_ comments) in
@@ -117,7 +139,7 @@ An example `overrides.json` might look like:
 As an extension developer, there are two methods to add a tour: the easiest is to use JupyterLab commands and the advanced version is to request this
 extension token `ITourManager`.
 
-### Add easily a tour
+### Add a tour with TypeScript
 
 ```ts
 const { commands } = app;
@@ -157,7 +179,7 @@ if ( tour ) {
 > One example is available on [Mamba navigator](https://github.com/mamba-org/gator/blob/master/packages/labextension/src/index.ts#L76).
 > Test it on [binder](https://mybinder.org/v2/gh/mamba-org/gator/master?urlpath=lab).
 
-## Disabling the User and Default Tours
+## Disabling the User, Notebook, and Default Tours
 
 If you _only_ wish to see the default _Welcome_ and _Notebook_ tours, or ones
 defined by users, they can be disabled via the command line or a well-known file.
@@ -171,6 +193,7 @@ From the command line, run:
 
 ```bash
 jupyter labextension disable "jupyterlab-tour:user-tours"
+jupyter labextension disable "jupyterlab-tour:notebook-tours"
 jupyter labextension disable "jupyterlab-tour:default-tours"
 ```
 
@@ -184,6 +207,7 @@ Create a [pageConfig.json] and put it in _the right place_, e.g.
 {
   "disabledExtensions": {
     "jupyterlab-tour:user-tours": true,
+    "jupyterlab-tour:notebook-tours": true,
     "jupyterlab-tour:default-tours": true,
   }
 }

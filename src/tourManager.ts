@@ -1,14 +1,18 @@
+import { ISignal, Signal } from '@lumino/signaling';
+import { Menu } from '@lumino/widgets';
+
 import { MainMenu } from '@jupyterlab/mainmenu';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { ISignal, Signal } from '@lumino/signaling';
-import { Menu } from '@lumino/widgets';
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { INotification } from 'jupyterlab_toastify';
+
 import { Locale, Props as JoyrideProps } from 'react-joyride';
+
 import { CommandIDs } from './constants';
-import { ITour, ITourHandler, ITourManager, NS } from './tokens';
+import { ITour, ITourHandler, ITourManager, NS, VERSION } from './tokens';
 import { TourHandler } from './tour';
-import { version } from './version';
 
 const STATE_ID = `${NS}:state`;
 
@@ -49,10 +53,10 @@ export class TourManager implements ITourManager {
     this._stateDB.fetch(STATE_ID).then(value => {
       if (value) {
         const savedState = (value as any) as IManagerState;
-        if (savedState.version !== version) {
+        if (savedState.version !== VERSION) {
           this._state.toursDone = new Set<string>();
           this._stateDB.save(STATE_ID, {
-            version,
+            version: VERSION,
             toursDone: []
           });
         } else {
@@ -119,7 +123,8 @@ export class TourManager implements ITourManager {
         tour.id,
         trans.__(tour.label),
         tour.hasHelpEntry === false ? false : true,
-        tour.options
+        tour.options,
+        tour.icon ? LabIcon.resolve({ icon: tour.icon }) : null
       );
 
       tour.steps.forEach(step => {
@@ -159,7 +164,8 @@ export class TourManager implements ITourManager {
     id: string,
     label: string,
     addToHelpMenu = true,
-    options: Omit<JoyrideProps, 'steps'> = {}
+    options: Omit<JoyrideProps, 'steps'> = {},
+    icon: LabIcon | null = null
   ): ITourHandler => {
     if (this._tours.has(id)) {
       throw new Error(
@@ -176,7 +182,7 @@ export class TourManager implements ITourManager {
     }
 
     // Create tour and add it to help menu if needed
-    const newTutorial: TourHandler = new TourHandler(id, label, options);
+    const newTutorial: TourHandler = new TourHandler(id, label, options, icon);
     if (this._menu && addToHelpMenu) {
       const menuItem = this._menu.helpMenu.menu.addItem({
         args: {
@@ -302,11 +308,20 @@ export class TourManager implements ITourManager {
     this._forgetDoneTour(id);
   }
 
+  /**
+   * Order a list of tours by label, if possible, falling back to unique id
+   */
+  sortTours(tours: ITour[]): ITour[] {
+    const sortedTours = [...tours];
+    sortedTours.sort(this._compareTours);
+    return sortedTours;
+  }
+
   private _forgetDoneTour = (id: string): void => {
     this._state.toursDone.delete(id);
     this._stateDB.save(STATE_ID, {
       toursDone: [...this._state.toursDone],
-      version
+      version: VERSION
     });
   };
 
@@ -314,9 +329,30 @@ export class TourManager implements ITourManager {
     this._state.toursDone.add(id);
     this._stateDB.save(STATE_ID, {
       toursDone: [...this._state.toursDone],
-      version
+      version: VERSION
     });
   };
+
+  /**
+   * Helper to sort user tours by label, if possible, falling back to unique id
+   */
+  private _compareTours(a: ITour, b: ITour): number {
+    let transA = this.translator;
+    if (a.translation) {
+      transA = this._translator.load(a.translation);
+    }
+    let transB = this.translator;
+    if (b.translation) {
+      transB = this._translator.load(b.translation);
+    }
+    return (
+      transA
+        .__(a.label)
+        .toLocaleLowerCase()
+        .localeCompare(transB.__(b.label).toLocaleLowerCase()) ||
+      a.id.localeCompare(b.id)
+    );
+  }
 
   private _activeTours: TourHandler[] = new Array<TourHandler>();
   private _isDisposed = false;
@@ -325,7 +361,7 @@ export class TourManager implements ITourManager {
   private _menuItems: Map<string, Menu.IItem> = new Map();
   private _state: IManagerState = {
     toursDone: new Set<string>(),
-    version
+    version: VERSION
   };
   private _stateDB: IStateDB;
   private _trans: TranslationBundle;

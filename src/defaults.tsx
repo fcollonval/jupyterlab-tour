@@ -1,8 +1,12 @@
+import React from 'react';
+
+import { CommandRegistry } from '@lumino/commands';
+
 import { ILabShell, JupyterFrontEnd } from '@jupyterlab/application';
 import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
-import { CommandRegistry } from '@lumino/commands';
-import React from 'react';
+
 import { NOTEBOOK_ID, WELCOME_ID } from './constants';
+import { defaultNotebookTourIcon, defaultTourIcon } from './icons';
 import { ITourManager } from './tokens';
 
 /**
@@ -17,7 +21,13 @@ function addWelcomeTour(
 ): void {
   const __ = manager.translator.__.bind(manager.translator);
 
-  const welcomeTour = manager.createTour(WELCOME_ID, __('Welcome Tour'), true);
+  const welcomeTour = manager.createTour(
+    WELCOME_ID,
+    __('Welcome Tour'),
+    true,
+    void 0,
+    defaultTourIcon
+  );
 
   welcomeTour.options = {
     ...welcomeTour.options,
@@ -144,7 +154,7 @@ function addWelcomeTour(
       <>
         <p>
           {__(
-            `The main area enables you to arrange documents and activities into 
+            `The main area enables you to arrange documents and activities into
             panels of tabs that can be resized or subdivided.`
           )}
         </p>
@@ -187,8 +197,8 @@ function addWelcomeTour(
         <p>
           <small>
             {__(
-              `Tip: The sidebar can be collapsed or expanded by selecting 
-              "Show Left Sidebar" in the View menu or by 
+              `Tip: The sidebar can be collapsed or expanded by selecting
+              "Show Left Sidebar" in the View menu or by
               clicking on the active sidebar tab.`
             )}
           </small>
@@ -205,8 +215,8 @@ function addWelcomeTour(
       <>
         <p>
           {__(
-            `The file browser enable you to work with files and directories on your 
-            system. This includes opening, creating, deleting, renaming, 
+            `The file browser enable you to work with files and directories on your
+            system. This includes opening, creating, deleting, renaming,
             downloading, copying, and sharing files and directories.`
           )}
         </p>
@@ -227,8 +237,8 @@ function addWelcomeTour(
       <>
         <p>
           {__(
-            `All user actions in JupyterLab are processed through a centralized 
-            command system, called command palette. It provides a keyboard-driven 
+            `All user actions in JupyterLab are processed through a centralized
+            command system, called command palette. It provides a keyboard-driven
             way to search for and run JupyterLab commands.`
           )}
         </p>
@@ -273,7 +283,9 @@ function addNotebookTour(
   const notebookTour = manager.createTour(
     NOTEBOOK_ID,
     __('Notebook Tour'),
-    true
+    true,
+    void 0,
+    defaultNotebookTourIcon
   );
 
   notebookTour.options = {
@@ -336,7 +348,7 @@ function addNotebookTour(
     content: (
       <p>
         {__(
-          `A cell has an input and an output area. This is the input area that you can edit with 
+          `A cell has an input and an output area. This is the input area that you can edit with
           the proper syntax depending on the type.`
         )}
       </p>
